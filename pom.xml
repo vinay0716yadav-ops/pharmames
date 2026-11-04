@@ -14,8 +14,8 @@
     <groupId>com.pharmames</groupId>
     <artifactId>pharmames-dashboard</artifactId>
     <version>1.0.0</version>
-    <name>PharmaMES</name>
-    <description>Pharmaceutical Manufacturing Execution System (MES) Dashboard</description>
+    <name>Vinay PharmaMES</name>
+    <description>Vinay Pharmaceutical Manufacturing Execution System (MES) Dashboard</description>
 
     <properties>
         <java.version>17</java.version>

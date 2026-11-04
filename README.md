@@ -1,12 +1,12 @@
-# PharmaMES – Pharmaceutical Manufacturing Execution System Dashboard
+# Vinay PharmaMES – Enterprise Pharmaceutical Manufacturing Execution System
 
 [![Java](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![21 CFR Part 11](https://img.shields.io/badge/Compliance-21%20CFR%20Part%2011%20Ready-orange.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)]()
+[![Permanent Storage](https://img.shields.io/badge/Storage-Permanent%20Disk%20DB-emerald.svg)]()
 
-**PharmaMES** is an educational, production-style Pharmaceutical Manufacturing Execution System (MES) web application designed to digitize pharmaceutical manufacturing operations, maintain Electronic Batch Records (EBR), enforce 21 CFR Part 11 regulatory audit trails, streamline quality assurance dispositions, and automate deployment via Docker and GitHub Actions.
+**Vinay PharmaMES** is an enterprise-grade Pharmaceutical Manufacturing Execution System (MES) web application engineered to digitize pharmaceutical manufacturing workflows, maintain Electronic Batch Records (EBR), enforce 21 CFR Part 11 regulatory compliance, streamline analytical quality assurance releases, and ensure **permanent transactional record persistence on disk**.
 
 ---
 
@@ -17,33 +17,34 @@
 | **Java 17+** | Backend core programming & JVM runtime |
 | **Spring Boot 3** | Enterprise framework (Spring MVC, Spring Data JPA, Bean Validation) |
 | **Maven** | Dependency management, build automation & test execution |
-| **Thymeleaf + HTML/CSS** | Modern clinical MES web frontend with real-time UI indicators |
-| **H2 Database** | Fast in-memory & persistent transactional store for batch dossiers |
+| **Thymeleaf + Chart.js + CSS3** | Clean clinical MES web frontend with real-time analytics & charts |
+| **H2 File Database** | **Permanent transactional disk storage** (`./data/pharmames_db.mv.db`) |
 | **Docker & Docker Compose** | Multi-stage containerization with non-root security execution |
-| **Git & GitHub** | Source code version control |
-| **GitHub Actions** | Automated CI/CD (lint, test, build JAR, Docker image publish) |
+| **Git & GitHub** | Source code version control hosted on GitHub |
+| **GitHub Actions** | Automated CI/CD (automated testing, build JAR, Docker image publish) |
 
 ---
 
 ## 2. Core MES Modules
 
 ### 1. Production Dashboard
-- **Real-time Plant Metrics**: Total batches, active in-progress lines, completed & released lots, pending orders, and quarantined lots.
-- **Stage Progression Tracker**: Visual overview of batch distribution across pharmaceutical unit operations.
-- **Live Audit Stream**: Instant feed of operator sign-offs and state transitions.
+- **Executive KPIs**: Real-time fleet metrics (Total Batches, Active In-Progress, Completed & Released, Pending Schedule, On Hold / Quarantined).
+- **Interactive Floor Analytics**: Live Chart.js doughnut chart for lifecycle status distribution and bar chart for 7-stage manufacturing unit operations.
+- **Permanent Storage Active Badge**: Continuous disk persistence indicator.
+- **Live Regulatory Stream**: Real-time feed of operator sign-offs, stage advancements, and QA dispositions.
 
 ### 2. Batch Management
-- **Master Formula Initiation**: Create new batches with targeted quantities, dosage forms (Tablets, Capsules, Suspensions, Injectables, Vials), manufacturing & expiration dates, assigned lines, and responsible scientists.
+- **Master Formula Initiation**: Create new batches with target quantities, dosage forms (Tablets, Capsules, Suspensions, Injectables, Vials), manufacturing & expiration dates, assigned lines, and responsible scientists.
 - **Lifecycle Advancement**: Step-by-step stage transitions (`Dispensing` &rarr; `Granulation` &rarr; `Compression` &rarr; `Coating` &rarr; `Packaging` &rarr; `QC Review` &rarr; `Released`).
-- **Operational Status Controls**: Instant capability to place batches on hold, investigate deviations, or resume production.
+- **Operational Controls**: Capability to place batches on hold, investigate deviations, or resume production.
 
 ### 3. Electronic Batch Records (EBR)
 - **Digital Operation Sign-Off**: Capture step numbers, operation names, and equipment parameters.
-- **Critical Process Parameters (CPPs)**: Record and compare target parameters vs actual measured values (e.g., temperatures, impeller RPM, compression force).
+- **Critical Process Parameters (CPPs)**: Compare target parameters vs actual measured values (e.g., temperatures, impeller RPM, compression force).
 - **Dual Electronic Signatures**: Operator execution signature and supervisor verification sign-off.
 - **Deviation Flagging**: Explicitly record parameter excursions with root cause comments.
 
-### 4. Quality Management & QA Release
+### 4. Quality Control (QC) & QA Release
 - **Analytical Laboratory Testing**: Record Active Ingredient Assay %, Dissolution Rate %, Moisture Content / Loss on Drying, and Microbial Bioburden.
 - **QA Disposition Workflow**:
   - `APPROVED`: Authorizes formal commercial release and flags batch as `COMPLETED`.
@@ -51,101 +52,72 @@
   - `QUARANTINED`: Places batch on hold for Out-of-Specification (OOS) investigation.
   - `REJECTED`: Permanently rejects non-conforming batch.
 
-### 5. Audit Trail (21 CFR Part 11)
+### 5. Regulatory Audit Trail (21 CFR Part 11)
 - **Tamper-Evident Chronological History**: Computer-generated timestamps, entity IDs, performed actions, operator credentials, roles, change reasons, and pre/post change details.
 - **Search & Filtering**: Search by batch number, operator, action keyword, or details.
-- **Regulatory Print/Export View**: Print-ready format for simulated health authority inspections.
+- **Regulatory Print/Export View**: Print-ready Certificate of Analysis and Batch Dossier format for simulated health authority inspections.
 
 ---
 
-## 3. Quick Start & Local Execution
+## 3. Permanent Record Persistence Guarantee
 
-### Prerequisites
-- **JDK 17 or later** (`java -version`)
-- **Apache Maven 3.8+** (`mvn -version`)
-- **Docker** (optional, for containerization)
+All records created in Vinay PharmaMES are **permanently saved on disk**:
+- **Database Engine**: H2 Persistent Embedded Engine (`AUTO_SERVER=TRUE`)
+- **Database File Location**: `./data/pharmames_db.mv.db`
+- **Integrity**: Every new batch, stage advance, EBR parameter measurement, QC approval, and audit trail record is written directly to physical disk. Restarting the server or machine preserves 100% of the manufacturing history and audit logs.
+
+---
+
+## 4. Quick Start & Local Execution
 
 ### Run with Maven
 ```bash
-# Clone or navigate to the project directory
-cd /Users/apple/.gemini/antigravity/scratch/pharmames
+# Navigate to the project directory
+cd /Users/apple/vinay/pharmames
 
 # Compile, test, and run the application
 mvn spring-boot:run
 ```
 
-Once started, open your browser and navigate to:
+Once started, open your web browser:
 - **MES Dashboard**: [http://localhost:8080](http://localhost:8080)
-- **H2 Database Console**: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-  - JDBC URL: `jdbc:h2:mem:pharmamesdb`
+- **H2 Permanent Database Console**: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+  - JDBC URL: `jdbc:h2:file:./data/pharmames_db`
   - User Name: `sa`
   - Password: *(leave blank)*
 
 ---
 
-## 4. Visual Studio Code Setup
+## 5. Visual Studio Code Setup
 
-To open and run the project in VS Code:
+To open the project in VS Code:
 
 ```bash
-# Open directly in VS Code
-open -a "Visual Studio Code" /Users/apple/.gemini/antigravity/scratch/pharmames
+open -a "Visual Studio Code" /Users/apple/vinay/pharmames
 # or if 'code' CLI is installed:
-code /Users/apple/.gemini/antigravity/scratch/pharmames
+code /Users/apple/vinay/pharmames
 ```
 
-The repository includes pre-configured `.vscode/` settings:
-- **Run & Debug**: Press `F5` or go to the Run & Debug tab and select **"Launch PharmaMES Application"**.
-- **Extensions**: Automatically recommends the **Extension Pack for Java** and **Spring Boot Tools**.
+- **Run & Debug**: Press `F5` and select **"Launch PharmaMES Application"**.
+- Pre-configured with `.vscode/launch.json` and `.vscode/settings.json`.
 
 ---
 
-## 5. Docker Containerization
+## 6. Docker Containerization
 
-### Build & Run with Docker
 ```bash
-# Build Docker container image
+cd /Users/apple/vinay/pharmames
+
+# Build Docker image
 docker build -t pharmames-dashboard:latest .
 
-# Run containerized MES application
-docker run -d -p 8080:8080 --name pharmames-app pharmames-dashboard:latest
+# Run container
+docker run -d -p 8080:8080 -v $(pwd)/data:/app/data --name pharmames-app pharmames-dashboard:latest
 ```
-
-### Run with Docker Compose
-```bash
-docker compose up --build -d
-```
-Access the application at [http://localhost:8080](http://localhost:8080).
 
 ---
 
-## 6. GitHub & GitHub Actions CI/CD Setup
+## 7. GitHub Repository & CI/CD
 
-### Initialize and Push to GitHub
-```bash
-cd /Users/apple/.gemini/antigravity/scratch/pharmames
-
-# Initialize git repository (if not already done)
-git init
-git add .
-git commit -m "feat: Initial commit for PharmaMES - Pharmaceutical MES Dashboard"
-
-# Create a new repository on GitHub using GitHub CLI
-gh repo create pharmames --public --source=. --remote=origin --push
-
-# Or push to an existing remote:
-# git remote add origin https://github.com/<your-username>/pharmames.git
-# git branch -M main
-# git push -u origin main
-```
-
-### GitHub Actions Pipeline
-The file [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) automates:
-1. **Continuous Integration**: Triggers on push to `main` and Pull Requests to run `mvn clean verify` and execute automated unit/integration tests.
-2. **Container Build**: Builds the Docker image.
-3. **Docker Hub Publishing**: If repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` are configured in GitHub Settings &rarr; Secrets, the pipeline automatically publishes the image to Docker Hub.
-
----
-
-## 7. Educational Notice
-> **Important**: This application is an educational prototype created to demonstrate digital manufacturing workflows, Good Manufacturing Practices (GMP) concepts, 21 CFR Part 11 audit trails, and CI/CD container automation. It is **not** a validated pharmaceutical production system.
+- **GitHub Repository**: [https://github.com/vinay0716yadav-ops/pharmames](https://github.com/vinay0716yadav-ops/pharmames)
+- **GitHub Actions**: Automated pipeline defined in `.github/workflows/ci-cd.yml` automatically verifies code, executes all test suites, and publishes Docker containers.

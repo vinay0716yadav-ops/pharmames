@@ -93,7 +93,7 @@
                     <div class="form-group">
                         <label class="form-label" for="operatorName">Executing Operator Signature *</label>
                         <input type="text" id="operatorName" th:field="*{operatorName}" class="form-control"
-                               placeholder="e.g. K. Rao (Operator ID: OP-104)" required>
+                               placeholder="e.g. Vinay Yadav (Lead Operator)" required>
                         <span class="form-error" th:if="${#fields.hasErrors('operatorName')}" th:errors="*{operatorName}"></span>
                     </div>
 
@@ -101,7 +101,7 @@
                     <div class="form-group">
                         <label class="form-label" for="supervisorName">Supervisor Verification Sign-Off</label>
                         <input type="text" id="supervisorName" th:field="*{supervisorName}" class="form-control"
-                               placeholder="e.g. Dr. A. Verma (Shift Lead)">
+                               placeholder="e.g. Vinay Yadav (Shift Supervisor)">
                     </div>
 
                     <!-- Deviation Details -->

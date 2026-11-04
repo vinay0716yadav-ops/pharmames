@@ -58,7 +58,7 @@ public class Batch {
     private String assignedLine = "Production Line 1";
 
     @Column(length = 64)
-    private String operatorInCharge = "Dr. M. Sharma";
+    private String operatorInCharge = "Vinay Yadav (Lead Formulation Scientist)";
 
     @Column(length = 500)
     private String notes;

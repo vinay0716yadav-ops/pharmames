@@ -3,26 +3,43 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title + ' - PharmaMES Dashboard'}">PharmaMES Dashboard</title>
+    <title th:text="${title + ' - Vinay PharmaMES'}">Vinay PharmaMES</title>
     <link rel="stylesheet" th:href="@{/css/mes.css}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
+    <!-- Chart.js for Interactive MES Floor Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <header class="mes-header" th:fragment="header(activeNav)">
     <div class="header-top">
         <a th:href="@{/dashboard}" class="brand">
-            <div class="brand-icon">℞</div>
+            <div class="brand-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+                    <path d="m8.5 8.5 7 7"/>
+                </svg>
+            </div>
             <div>
-                <div class="brand-title">PharmaMES</div>
-                <div class="brand-subtitle">Pharmaceutical Manufacturing Execution System</div>
+                <div class="brand-title">VINAY PHARMAMES</div>
+                <div class="brand-subtitle">ENTERPRISE PHARMACEUTICAL MANUFACTURING EXECUTION SYSTEM</div>
             </div>
         </a>
 
         <div class="system-status">
-            <span class="badge-gmp">21 CFR Part 11 Active</span>
-            <div style="color: #94a3b8; font-family: monospace; font-size: 0.85rem;">
+            <span class="badge-storage">
+                <span class="pulse-dot"></span> Permanent DB: ./data/pharmames_db
+            </span>
+            <span class="badge-gmp">
+                <span class="pulse-dot-green"></span> 21 CFR Part 11 Active
+            </span>
+            <div class="plant-time">
                 <span id="plantClock">Loading clock...</span>
+            </div>
+            <div class="user-badge">
+                <span class="user-avatar">VY</span>
+                <span style="font-weight: 600; color: #f8fafc;">Vinay Yadav</span>
+                <span style="color: #94a3b8; font-size: 0.75rem;">(Plant Lead)</span>
             </div>
             <a th:href="@{/h2-console}" target="_blank" class="btn btn-secondary btn-sm" style="color: #cbd5e1; border-color: #334155; background: #1e293b;">
                 H2 Console
@@ -41,10 +58,10 @@
             📋 Electronic Batch Records (EBR)
         </a>
         <a th:href="@{/quality}" class="nav-link" th:classappend="${activeNav == 'quality' ? 'active' : ''}">
-            🔬 Quality Management
+            🔬 Quality Control &amp; Release
         </a>
         <a th:href="@{/audit}" class="nav-link" th:classappend="${activeNav == 'audit' ? 'active' : ''}">
-            🛡️ Audit Trail (Part 11)
+            🛡️ Regulatory Audit Trail (Part 11)
         </a>
     </nav>
 </header>
@@ -63,7 +80,10 @@
 
 <footer class="mes-footer" th:fragment="footer">
     <div>
-        <strong>PharmaMES</strong> &copy; 2026 – Educational MES Prototype | Built with Spring Boot 3 &amp; Thymeleaf | Demonstrating Good Manufacturing Practices (GMP) Digital Workflows
+        <strong>Vinay PharmaMES</strong> &copy; 2026 – Enterprise Pharmaceutical MES | Facility Unit 1 | FDA 21 CFR Part 11 Validated Digital Architecture
+    </div>
+    <div style="margin-top: 0.35rem; font-size: 0.75rem; color: #64748b;">
+        💾 Permanent Records Active: Stored and permanently updated on disk in <code>./data/pharmames_db.mv.db</code>
     </div>
     <script th:src="@{/js/mes.js}"></script>
 </footer>

@@ -8,8 +8,8 @@
 <div class="container" style="max-width: 900px;">
     <div style="margin-bottom: 1.5rem;">
         <a th:href="@{/batches}" style="text-decoration: none; color: #64748b; font-size: 0.85rem;">&larr; Back to Batches</a>
-        <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">Initiate Pharmaceutical Production Batch</h1>
-        <p style="color: #64748b; font-size: 0.9rem;">Authorizes work order initiation and generates electronic batch record tracking.</p>
+        <h1 style="font-size: 1.7rem; font-weight: 800; color: #0f172a; margin-top: 0.25rem;">Initiate Pharmaceutical Production Batch</h1>
+        <p style="color: #64748b; font-size: 0.95rem;">Authorizes master formula initiation, allocates manufacturing line, and commits permanent records.</p>
     </div>
 
     <!-- Alert Notifications -->
@@ -19,8 +19,8 @@
 
     <div class="card">
         <div class="card-header">
-            <div class="card-title">Production Order Specification</div>
-            <span class="badge badge-primary">GMP Order Formulation</span>
+            <div class="card-title">Master Production Order Formulation</div>
+            <span class="badge badge-primary">GMP Permanent Record</span>
         </div>
         <div class="card-body">
             <form th:action="@{/batches}" th:object="${batch}" method="post">
@@ -28,7 +28,7 @@
                     <!-- Batch Number -->
                     <div class="form-group">
                         <label class="form-label" for="batchNumber">Batch Number *</label>
-                        <input type="text" id="batchNumber" th:field="*{batchNumber}" class="form-control" placeholder="e.g. BAT-2026-007" required>
+                        <input type="text" id="batchNumber" th:field="*{batchNumber}" class="form-control" placeholder="e.g. BAT-2026-008" required>
                         <span class="form-error" th:if="${#fields.hasErrors('batchNumber')}" th:errors="*{batchNumber}"></span>
                     </div>
 
@@ -87,7 +87,7 @@
                     <!-- Operator In Charge -->
                     <div class="form-group">
                         <label class="form-label" for="operatorInCharge">Lead Formulation Scientist / Operator *</label>
-                        <input type="text" id="operatorInCharge" th:field="*{operatorInCharge}" class="form-control" placeholder="e.g. Dr. A. Verma" required>
+                        <input type="text" id="operatorInCharge" th:field="*{operatorInCharge}" class="form-control" value="Vinay Yadav (Lead Formulation Scientist)" required>
                     </div>
 
                     <!-- Manufacturing Date -->
@@ -107,7 +107,7 @@
                     <!-- 21 CFR Part 11 Audit Reason -->
                     <div class="form-group full-width">
                         <label class="form-label" for="reason">Regulatory Reason for Batch Initiation (21 CFR Part 11)</label>
-                        <input type="text" id="reason" name="reason" class="form-control" value="Commercial Production Order Campaign" required>
+                        <input type="text" id="reason" name="reason" class="form-control" value="Vinay Pharma Commercial Campaign Order" required>
                     </div>
 
                     <!-- Batch Notes -->

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Batch Management')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('batches')}"></header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a;">Pharmaceutical Batch Directory</h1>
+            <p style="color: #64748b; font-size: 0.9rem;">Lifecycle tracking, master formula execution and batch disposition</p>
+        </div>
+        <div>
+            <a th:href="@{/batches/new}" class="btn btn-primary">
+                ➕ Initiate New Batch
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Filters & Search Bar -->
+    <div class="filter-bar">
+        <div class="filter-pills">
+            <a th:href="@{/batches}" class="pill-link" th:classappend="${selectedStatus == null and search == null ? 'active' : ''}">All Batches</a>
+            <a th:each="st : ${statuses}"
+               th:href="@{/batches(status=${st})}"
+               class="pill-link"
+               th:classappend="${selectedStatus == st ? 'active' : ''}"
+               th:text="${st.displayName}">Status</a>
+        </div>
+
+        <form th:action="@{/batches}" method="get" class="search-box">
+            <input type="text" name="search" th:value="${search}" placeholder="Search batch, product, line..." class="form-control" style="width: 240px; padding: 0.4rem 0.75rem;">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            <a th:if="${search != null or selectedStatus != null}" th:href="@{/batches}" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
+    </div>
+
+    <!-- Batches Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Batch Number</th>
+                        <th>Product &amp; Form</th>
+                        <th>Target Qty</th>
+                        <th>Manufacturing Line</th>
+                        <th>Current Stage</th>
+                        <th>Status</th>
+                        <th>Mfg Date</th>
+                        <th>Exp Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(batches)}">
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No pharmaceutical batches found matching the selected criteria.
+                        </td>
+                    </tr>
+                    <tr th:each="batch : ${batches}">
+                        <td>
+                            <a th:href="@{'/batches/' + ${batch.id}}" style="font-weight: 700; color: #0284c7; text-decoration: none;" th:text="${batch.batchNumber}">BAT-2026-001</a>
+                        </td>
+                        <td>
+                            <strong th:text="${batch.productName}">Product</strong>
+                            <div style="font-size: 0.75rem; color: #64748b;" th:text="${batch.dosageForm}">Tablet</div>
+                        </td>
+                        <td>
+                            <span th:text="${#numbers.formatDecimal(batch.targetQuantity, 0, 'COMMA', 0, 'POINT')}">500,000</span>
+                            <span style="font-size: 0.75rem; color: #64748b;" th:text="${batch.unit}">Tablets</span>
+                        </td>
+                        <td th:text="${batch.assignedLine}">Line 1</td>
+                        <td>
+                            <span class="badge badge-info" th:text="${batch.currentStage.displayName}">Stage</span>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="${batch.status.badgeClass}" th:text="${batch.status.displayName}">Status</span>
+                        </td>
+                        <td th:text="${batch.manufacturingDate}">2026-01-01</td>
+                        <td th:text="${batch.expiryDate}">2029-01-01</td>
+                        <td>
+                            <div style="display: flex; gap: 0.35rem;">
+                                <a th:href="@{'/batches/' + ${batch.id}}" class="btn btn-secondary btn-sm">Dossier</a>
+                                <a th:href="@{'/ebr/new?batchId=' + ${batch.id}}" class="btn btn-primary btn-sm" title="Log EBR Step">✍️ EBR</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

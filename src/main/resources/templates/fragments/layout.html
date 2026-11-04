@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' - PharmaMES Dashboard'}">PharmaMES Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/mes.css}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
+</head>
+<body>
+
+<header class="mes-header" th:fragment="header(activeNav)">
+    <div class="header-top">
+        <a th:href="@{/dashboard}" class="brand">
+            <div class="brand-icon">℞</div>
+            <div>
+                <div class="brand-title">PharmaMES</div>
+                <div class="brand-subtitle">Pharmaceutical Manufacturing Execution System</div>
+            </div>
+        </a>
+
+        <div class="system-status">
+            <span class="badge-gmp">21 CFR Part 11 Active</span>
+            <div style="color: #94a3b8; font-family: monospace; font-size: 0.85rem;">
+                <span id="plantClock">Loading clock...</span>
+            </div>
+            <a th:href="@{/h2-console}" target="_blank" class="btn btn-secondary btn-sm" style="color: #cbd5e1; border-color: #334155; background: #1e293b;">
+                H2 Console
+            </a>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <a th:href="@{/dashboard}" class="nav-link" th:classappend="${activeNav == 'dashboard' ? 'active' : ''}">
+            📊 Production Dashboard
+        </a>
+        <a th:href="@{/batches}" class="nav-link" th:classappend="${activeNav == 'batches' ? 'active' : ''}">
+            💊 Batch Management
+        </a>
+        <a th:href="@{/ebr}" class="nav-link" th:classappend="${activeNav == 'ebr' ? 'active' : ''}">
+            📋 Electronic Batch Records (EBR)
+        </a>
+        <a th:href="@{/quality}" class="nav-link" th:classappend="${activeNav == 'quality' ? 'active' : ''}">
+            🔬 Quality Management
+        </a>
+        <a th:href="@{/audit}" class="nav-link" th:classappend="${activeNav == 'audit' ? 'active' : ''}">
+            🛡️ Audit Trail (Part 11)
+        </a>
+    </nav>
+</header>
+
+<div class="container">
+    <!-- Success Alert -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}">Operation completed successfully.</span>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}">An error occurred.</span>
+    </div>
+</div>
+
+<footer class="mes-footer" th:fragment="footer">
+    <div>
+        <strong>PharmaMES</strong> &copy; 2026 – Educational MES Prototype | Built with Spring Boot 3 &amp; Thymeleaf | Demonstrating Good Manufacturing Practices (GMP) Digital Workflows
+    </div>
+    <script th:src="@{/js/mes.js}"></script>
+</footer>
+
+</body>
+</html>

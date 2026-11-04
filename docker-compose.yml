@@ -1,0 +1,12 @@
+services:
+  pharmames:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pharmames-dashboard:latest
+    container_name: pharmames-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: unless-stopped

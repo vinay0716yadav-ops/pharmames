@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quality Management & QA Release')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('quality')}"></header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a;">Quality Control &amp; QA Release</h1>
+            <p style="color: #64748b; font-size: 0.9rem;">Analytical testing verification, release dispositions and deviation reviews</p>
+        </div>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <!-- Quality KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card" style="border-top: 3px solid #10b981;">
+            <div class="kpi-title">QA Approved &amp; Released</div>
+            <div class="kpi-value" style="color: #10b981;" th:text="${approvedCount}">0</div>
+            <div class="kpi-sub">Commercial release certified</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid #0284c7;">
+            <div class="kpi-title">Under QC Review</div>
+            <div class="kpi-value" style="color: #0284c7;" th:text="${reviewCount}">0</div>
+            <div class="kpi-sub">Laboratory assays ongoing</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
+            <div class="kpi-title">Quarantined / On Hold</div>
+            <div class="kpi-value" style="color: #d97706;" th:text="${quarantinedCount}">0</div>
+            <div class="kpi-sub">OOS or deviation active</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid #ef4444;">
+            <div class="kpi-title">Rejected Batches</div>
+            <div class="kpi-value" style="color: #ef4444;" th:text="${rejectedCount}">0</div>
+            <div class="kpi-sub">Disposed / Non-conforming</div>
+        </div>
+    </div>
+
+    <!-- Batches Requiring or In Quality Control -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Production Batches &amp; Quality Review Status</div>
+            <span style="font-size: 0.8rem; color: #64748b;">Select a batch to evaluate analytical assays and release</span>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Batch Number</th>
+                        <th>Product Name</th>
+                        <th>Manufacturing Line</th>
+                        <th>Current Stage</th>
+                        <th>Batch Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${batches}">
+                        <td>
+                            <a th:href="@{'/batches/' + ${b.id}}" style="font-weight: 700; color: #0284c7; text-decoration: none;" th:text="${b.batchNumber}">BAT-001</a>
+                        </td>
+                        <td>
+                            <strong th:text="${b.productName}">Product</strong>
+                            <div style="font-size: 0.75rem; color: #64748b;" th:text="${b.dosageForm}">Tablet</div>
+                        </td>
+                        <td th:text="${b.assignedLine}">Line 1</td>
+                        <td>
+                            <span class="badge badge-info" th:text="${b.currentStage.displayName}">Stage</span>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="${b.status.badgeClass}" th:text="${b.status.displayName}">Status</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/quality/' + ${b.id} + '/review'}" class="btn btn-secondary btn-sm">
+                                🔬 Evaluate &amp; Sign-Off
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Complete History of Quality Records -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Completed QC Analytical Test Logs</div>
+            <span class="badge badge-info" th:text="${#lists.size(records) + ' Records'}">0</span>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Assay (95-105%)</th>
+                        <th>Dissolution (&gt;=80%)</th>
+                        <th>Moisture (&lt;=3%)</th>
+                        <th>Microbial Status</th>
+                        <th>Disposition</th>
+                        <th>QC Inspector</th>
+                        <th>QA Sign-Off</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(records)}">
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No QC analytical test records logged yet.
+                        </td>
+                    </tr>
+                    <tr th:each="qc : ${records}">
+                        <td>
+                            <a th:href="@{'/batches/' + ${qc.batch.id}}" style="font-weight: 700; color: #0284c7; text-decoration: none;" th:text="${qc.batch.batchNumber}">BAT-001</a>
+                            <div style="font-size: 0.75rem; color: #64748b;" th:text="${qc.batch.productName}">Product</div>
+                        </td>
+                        <td><strong th:text="${qc.assayPercentage + '%'}">99.8%</strong></td>
+                        <td><strong th:text="${qc.dissolutionRate + '%'}">95.0%</strong></td>
+                        <td><span th:text="${qc.moistureContent + '%'}">1.5%</span></td>
+                        <td th:text="${qc.microbialStatus}">Conforms</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${qc.disposition == 'APPROVED' ? 'badge-success' : (qc.disposition == 'UNDER_REVIEW' ? 'badge-primary' : (qc.disposition == 'QUARANTINED' ? 'badge-warning' : 'badge-danger'))}"
+                                  th:text="${qc.disposition}">APPROVED</span>
+                        </td>
+                        <td th:text="${qc.inspectorName}">Inspector</td>
+                        <td th:text="${qc.qaOfficer != null ? qc.qaOfficer : '—'}">QA Officer</td>
+                        <td style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(qc.reviewedAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Record EBR Step')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('ebr')}"></header>
+
+<div class="container" style="max-width: 850px;">
+    <div style="margin-bottom: 1.5rem;">
+        <a th:href="@{/ebr}" style="text-decoration: none; color: #64748b; font-size: 0.85rem;">&larr; Back to EBR List</a>
+        <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">Record Electronic Batch Step (EBR)</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Digital verification and parameter sign-off under Good Manufacturing Practices</p>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Manufacturing Step Execution &amp; Signature</div>
+            <span class="badge badge-primary">21 CFR Part 11 Electronic Signature</span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/ebr}" th:object="${record}" method="post">
+                <div class="form-grid">
+                    <!-- Batch Selection -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="batchSelect">Target Production Batch *</label>
+                        <select id="batchSelect" name="batchId" class="form-select" required>
+                            <option value="">Select a batch...</option>
+                            <option th:each="b : ${batches}"
+                                    th:value="${b.id}"
+                                    th:selected="${selectedBatch != null and selectedBatch.id == b.id}"
+                                    th:text="${b.batchNumber + ' – ' + b.productName + ' (' + b.currentStage.displayName + ')'}">
+                                BAT-2026-001
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Step Number -->
+                    <div class="form-group">
+                        <label class="form-label" for="stepNumber">Step Sequence Number *</label>
+                        <input type="number" id="stepNumber" th:field="*{stepNumber}" class="form-control" placeholder="e.g. 1" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('stepNumber')}" th:errors="*{stepNumber}"></span>
+                    </div>
+
+                    <!-- Manufacturing Stage -->
+                    <div class="form-group">
+                        <label class="form-label" for="stage">Unit Operation Stage *</label>
+                        <select id="stage" th:field="*{stage}" class="form-select" required>
+                            <option th:each="st : ${stages}"
+                                    th:value="${st}"
+                                    th:text="${st.displayName}">Stage</option>
+                        </select>
+                    </div>
+
+                    <!-- Step Name -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="stepName">Step Name / Operation Description *</label>
+                        <input type="text" id="stepName" th:field="*{stepName}" class="form-control"
+                               placeholder="e.g. High-Shear Granulation Impeller Speed Verification" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('stepName')}" th:errors="*{stepName}"></span>
+                    </div>
+
+                    <!-- Target Parameters -->
+                    <div class="form-group">
+                        <label class="form-label" for="targetParameters">Target Critical Process Parameters (CPP)</label>
+                        <input type="text" id="targetParameters" th:field="*{targetParameters}" class="form-control"
+                               placeholder="e.g. Temp: 22-26°C, Impeller: 150 RPM">
+                    </div>
+
+                    <!-- Actual Measured Parameters -->
+                    <div class="form-group">
+                        <label class="form-label" for="actualParameters">Actual Measured Parameters *</label>
+                        <input type="text" id="actualParameters" th:field="*{actualParameters}" class="form-control"
+                               placeholder="e.g. Temp: 24.1°C, Impeller: 150 RPM" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('actualParameters')}" th:errors="*{actualParameters}"></span>
+                    </div>
+
+                    <!-- Step Result Status -->
+                    <div class="form-group">
+                        <label class="form-label" for="status">Verification Status *</label>
+                        <select id="status" th:field="*{status}" class="form-select" required>
+                            <option value="PASS">PASS – Within validated tolerances</option>
+                            <option value="DEVIATION">DEVIATION – Out of specification / excursion</option>
+                            <option value="FAIL">FAIL – Critical step failure</option>
+                        </select>
+                    </div>
+
+                    <!-- Operator Signature -->
+                    <div class="form-group">
+                        <label class="form-label" for="operatorName">Executing Operator Signature *</label>
+                        <input type="text" id="operatorName" th:field="*{operatorName}" class="form-control"
+                               placeholder="e.g. K. Rao (Operator ID: OP-104)" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('operatorName')}" th:errors="*{operatorName}"></span>
+                    </div>
+
+                    <!-- Supervisor Sign-Off -->
+                    <div class="form-group">
+                        <label class="form-label" for="supervisorName">Supervisor Verification Sign-Off</label>
+                        <input type="text" id="supervisorName" th:field="*{supervisorName}" class="form-control"
+                               placeholder="e.g. Dr. A. Verma (Shift Lead)">
+                    </div>
+
+                    <!-- Deviation Details -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="deviationDetails">Deviation Description (if applicable)</label>
+                        <input type="text" id="deviationDetails" th:field="*{deviationDetails}" class="form-control"
+                               placeholder="Describe parameter excursion, root cause, and immediate corrective containment...">
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="comments">Process Remarks &amp; Observations</label>
+                        <textarea id="comments" th:field="*{comments}" rows="3" class="form-control"
+                                  placeholder="Observations regarding powder flowability, blending homogeneity, equipment state..."></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+                    <a th:href="@{/ebr}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        ✍️ Sign &amp; Commit EBR Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch PharmaMES Application",
+      "request": "launch",
+      "mainClass": "com.pharmames.PharmaMesApplication",
+      "projectName": "pharmames-dashboard",
+      "args": "",
+      "vmArgs": "-Dspring.profiles.active=dev"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Audit Trail (21 CFR Part 11)')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('audit')}"></header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a;">Regulatory Audit Trail (21 CFR Part 11)</h1>
+            <p style="color: #64748b; font-size: 0.9rem;">Computer-generated, time-stamped, tamper-evident audit record of manufacturing events</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="window.print()" class="btn btn-secondary">
+                🖨️ Print / Export Dossier
+            </button>
+        </div>
+    </div>
+
+    <!-- 21 CFR Part 11 Compliance Banner -->
+    <div class="card" style="background: #f8fafc; border-left: 4px solid #0284c7; margin-bottom: 1.25rem;">
+        <div class="card-body" style="padding: 1rem 1.25rem; font-size: 0.85rem; color: #334155;">
+            <strong>GMP Traceability Enforced:</strong> Every batch initiation, stage progression, Electronic Batch Record (EBR) sign-off, parameter deviation, and QA release disposition generates an immutable log entry containing execution timestamp, operator identity, role, operational reason, and exact change details.
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <form th:action="@{/audit}" method="get" class="search-box" style="flex: 1; max-width: 500px;">
+            <input type="text" name="search" th:value="${search}" placeholder="Search by batch number, operator, action, or details..." class="form-control" style="padding: 0.5rem 0.85rem;">
+            <button type="submit" class="btn btn-secondary">Filter Logs</button>
+            <a th:if="${search != null}" th:href="@{/audit}" class="btn btn-secondary">Clear</a>
+        </form>
+
+        <span class="badge badge-info" th:text="${#lists.size(auditLogs) + ' Immutable Records'}">0 Logs</span>
+    </div>
+
+    <!-- Audit Records Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th style="width: 170px;">Timestamp (UTC)</th>
+                        <th>Entity</th>
+                        <th>Batch / Record</th>
+                        <th>Action Performed</th>
+                        <th>Performed By</th>
+                        <th>User Role</th>
+                        <th>Reason for Change</th>
+                        <th>Detailed Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(auditLogs)}">
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No audit log records match the search filter.
+                        </td>
+                    </tr>
+                    <tr th:each="log : ${auditLogs}">
+                        <td style="font-family: monospace; font-size: 0.8rem; color: #475569;"
+                            th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                            2026-01-01 12:00:00
+                        </td>
+                        <td>
+                            <span class="badge badge-secondary" th:text="${log.entityType}">BATCH</span>
+                        </td>
+                        <td>
+                            <strong style="color: #0284c7;" th:text="${log.entityIdentifier}">BAT-2026-001</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" th:text="${log.action}">CREATE_BATCH</span>
+                        </td>
+                        <td>
+                            <strong th:text="${log.performedBy}">Operator</strong>
+                        </td>
+                        <td th:text="${log.userRole}">Role</td>
+                        <td style="color: #475569;" th:text="${log.reasonForChange}">Reason</td>
+                        <td th:text="${log.details}">Detailed log description</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

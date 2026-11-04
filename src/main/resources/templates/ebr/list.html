@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Electronic Batch Records (EBR)')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('ebr')}"></header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a;">Electronic Batch Records (EBR)</h1>
+            <p style="color: #64748b; font-size: 0.9rem;">Digital execution of Master Production Instructions &amp; Critical Process Parameters (CPPs)</p>
+        </div>
+        <div>
+            <a th:href="@{/ebr/new}" class="btn btn-primary">
+                ✍️ Record New EBR Step
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Plant-Wide Digital Manufacturing Step Logs</div>
+            <span class="badge badge-info" th:text="${#lists.size(records) + ' Recorded Steps'}">0 Steps</span>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Step #</th>
+                        <th>Stage</th>
+                        <th>Unit Operation / Step</th>
+                        <th>Target Parameters</th>
+                        <th>Actual Measured (CPP)</th>
+                        <th>Status</th>
+                        <th>Signed By</th>
+                        <th>Supervisor</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(records)}">
+                        <td colspan="10" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No Electronic Batch Records recorded yet.
+                        </td>
+                    </tr>
+                    <tr th:each="r : ${records}">
+                        <td>
+                            <a th:href="@{'/batches/' + ${r.batch.id}}" style="font-weight: 700; color: #0284c7; text-decoration: none;" th:text="${r.batch.batchNumber}">BAT-001</a>
+                            <div style="font-size: 0.75rem; color: #64748b;" th:text="${r.batch.productName}">Product</div>
+                        </td>
+                        <td style="font-weight: 700; color: #0f172a;" th:text="'#' + ${r.stepNumber}">#1</td>
+                        <td>
+                            <span class="badge badge-secondary" th:text="${r.stage.displayName}">Stage</span>
+                        </td>
+                        <td>
+                            <strong th:text="${r.stepName}">Step Name</strong>
+                            <div th:if="${r.comments != null and !r.comments.empty}" style="font-size: 0.75rem; color: #64748b;" th:text="${r.comments}">Comments</div>
+                        </td>
+                        <td style="font-family: monospace; font-size: 0.8rem; color: #64748b;" th:text="${r.targetParameters}">Target</td>
+                        <td style="font-family: monospace; font-size: 0.8rem; font-weight: 600;" th:text="${r.actualParameters}">Actual</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${r.status == 'PASS' ? 'badge-success' : (r.status == 'DEVIATION' ? 'badge-warning' : 'badge-danger')}"
+                                  th:text="${r.status}">PASS</span>
+                            <div th:if="${r.deviationDetails != null and !r.deviationDetails.empty}"
+                                 style="font-size: 0.7rem; color: #b91c1c; margin-top: 0.2rem;" th:text="${r.deviationDetails}">Dev details</div>
+                        </td>
+                        <td th:text="${r.operatorName}">Operator</td>
+                        <td th:text="${r.supervisorName != null ? r.supervisorName : '—'}">Supervisor</td>
+                        <td style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(r.signedAt, 'yyyy-MM-dd HH:mm')}">Time</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Initiate New Pharmaceutical Batch')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('batches')}"></header>
+
+<div class="container" style="max-width: 900px;">
+    <div style="margin-bottom: 1.5rem;">
+        <a th:href="@{/batches}" style="text-decoration: none; color: #64748b; font-size: 0.85rem;">&larr; Back to Batches</a>
+        <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">Initiate Pharmaceutical Production Batch</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Authorizes work order initiation and generates electronic batch record tracking.</p>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Production Order Specification</div>
+            <span class="badge badge-primary">GMP Order Formulation</span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/batches}" th:object="${batch}" method="post">
+                <div class="form-grid">
+                    <!-- Batch Number -->
+                    <div class="form-group">
+                        <label class="form-label" for="batchNumber">Batch Number *</label>
+                        <input type="text" id="batchNumber" th:field="*{batchNumber}" class="form-control" placeholder="e.g. BAT-2026-007" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('batchNumber')}" th:errors="*{batchNumber}"></span>
+                    </div>
+
+                    <!-- Product Name -->
+                    <div class="form-group">
+                        <label class="form-label" for="productName">Product Name &amp; Strength *</label>
+                        <input type="text" id="productName" th:field="*{productName}" class="form-control" placeholder="e.g. Ibuprofen 400mg Tablets" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}"></span>
+                    </div>
+
+                    <!-- Dosage Form -->
+                    <div class="form-group">
+                        <label class="form-label" for="dosageForm">Dosage Form *</label>
+                        <select id="dosageForm" th:field="*{dosageForm}" class="form-select" required>
+                            <option value="">Select Dosage Form...</option>
+                            <option value="Tablet">Tablet (Oral Solid Dose)</option>
+                            <option value="Capsule">Capsule (Hard Gelatin)</option>
+                            <option value="Oral Suspension">Oral Liquid Suspension</option>
+                            <option value="Injectable">Injectable Solution (Sterile)</option>
+                            <option value="Topical Ointment">Topical Ointment / Cream</option>
+                            <option value="Lyophilized Vial">Lyophilized Powder</option>
+                        </select>
+                        <span class="form-error" th:if="${#fields.hasErrors('dosageForm')}" th:errors="*{dosageForm}"></span>
+                    </div>
+
+                    <!-- Target Quantity & Unit -->
+                    <div class="form-group" style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.5rem;">
+                        <div>
+                            <label class="form-label" for="targetQuantity">Target Quantity *</label>
+                            <input type="number" step="0.1" id="targetQuantity" th:field="*{targetQuantity}" class="form-control" placeholder="e.g. 500000" required>
+                            <span class="form-error" th:if="${#fields.hasErrors('targetQuantity')}" th:errors="*{targetQuantity}"></span>
+                        </div>
+                        <div>
+                            <label class="form-label" for="unit">Unit *</label>
+                            <select id="unit" th:field="*{unit}" class="form-select" required>
+                                <option value="Tablets">Tablets</option>
+                                <option value="Capsules">Capsules</option>
+                                <option value="Liters">Liters</option>
+                                <option value="Vials">Vials</option>
+                                <option value="kg">kg</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Manufacturing Line -->
+                    <div class="form-group">
+                        <label class="form-label" for="assignedLine">Assigned Manufacturing Line *</label>
+                        <select id="assignedLine" th:field="*{assignedLine}" class="form-select">
+                            <option value="Line 1 - Solid Dose Rotary">Line 1 - Solid Dose Rotary</option>
+                            <option value="Line 2 - Liquid Sterile Suite">Line 2 - Liquid Sterile Suite</option>
+                            <option value="Line 3 - Biologics Aseptic">Line 3 - Biologics Aseptic</option>
+                            <option value="Line 4 - High Speed Rotary">Line 4 - High Speed Rotary</option>
+                        </select>
+                    </div>
+
+                    <!-- Operator In Charge -->
+                    <div class="form-group">
+                        <label class="form-label" for="operatorInCharge">Lead Formulation Scientist / Operator *</label>
+                        <input type="text" id="operatorInCharge" th:field="*{operatorInCharge}" class="form-control" placeholder="e.g. Dr. A. Verma" required>
+                    </div>
+
+                    <!-- Manufacturing Date -->
+                    <div class="form-group">
+                        <label class="form-label" for="manufacturingDate">Manufacturing Date *</label>
+                        <input type="date" id="manufacturingDate" th:field="*{manufacturingDate}" class="form-control" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('manufacturingDate')}" th:errors="*{manufacturingDate}"></span>
+                    </div>
+
+                    <!-- Expiration Date -->
+                    <div class="form-group">
+                        <label class="form-label" for="expiryDate">Expiration Date *</label>
+                        <input type="date" id="expiryDate" th:field="*{expiryDate}" class="form-control" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('expiryDate')}" th:errors="*{expiryDate}"></span>
+                    </div>
+
+                    <!-- 21 CFR Part 11 Audit Reason -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="reason">Regulatory Reason for Batch Initiation (21 CFR Part 11)</label>
+                        <input type="text" id="reason" name="reason" class="form-control" value="Commercial Production Order Campaign" required>
+                    </div>
+
+                    <!-- Batch Notes -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="notes">Formulation Instructions &amp; Special Precautions</label>
+                        <textarea id="notes" th:field="*{notes}" rows="3" class="form-control" placeholder="Specific humidity constraints, HEPA suite sanitization, active ingredient storage conditions..."></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+                    <a th:href="@{/batches}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        🚀 Authorize &amp; Initiate Batch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

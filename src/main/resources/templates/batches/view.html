@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Batch ' + ${batch.batchNumber})}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('batches')}"></header>
+
+<div class="container">
+    <div style="margin-bottom: 1.5rem;">
+        <a th:href="@{/batches}" style="text-decoration: none; color: #64748b; font-size: 0.85rem;">&larr; Back to Batches</a>
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 0.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <h1 style="font-size: 1.8rem; font-weight: 700; color: #0f172a;" th:text="${batch.batchNumber}">BAT-2026-001</h1>
+                    <span class="badge" th:classappend="${batch.status.badgeClass}" th:text="${batch.status.displayName}">Status</span>
+                    <span class="badge badge-info" th:text="${batch.currentStage.displayName}">Stage</span>
+                </div>
+                <p style="color: #475569; font-size: 1.1rem; font-weight: 600; margin-top: 0.2rem;" th:text="${batch.productName}">Product Name</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <!-- Advance Stage Form -->
+                <form th:if="${batch.currentStage.name() != 'RELEASED' and batch.status.name() != 'REJECTED'}"
+                      th:action="@{'/batches/' + ${batch.id} + '/advance'}" method="post" style="display: inline;">
+                    <input type="hidden" name="operatorName" th:value="${batch.operatorInCharge}">
+                    <input type="hidden" name="reason" value="Stage operations completed and verified">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        ⏩ Advance to Next Stage
+                    </button>
+                </form>
+
+                <!-- Put on Hold Form -->
+                <form th:if="${batch.status.name() == 'IN_PROGRESS' or batch.status.name() == 'PENDING'}"
+                      th:action="@{'/batches/' + ${batch.id} + '/status'}" method="post" style="display: inline;">
+                    <input type="hidden" name="status" value="ON_HOLD">
+                    <input type="hidden" name="operatorName" th:value="${batch.operatorInCharge}">
+                    <input type="hidden" name="reason" value="Process investigation required">
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        ⏸️ Put On Hold
+                    </button>
+                </form>
+
+                <!-- Resume Form -->
+                <form th:if="${batch.status.name() == 'ON_HOLD'}"
+                      th:action="@{'/batches/' + ${batch.id} + '/status'}" method="post" style="display: inline;">
+                    <input type="hidden" name="status" value="IN_PROGRESS">
+                    <input type="hidden" name="operatorName" th:value="${batch.operatorInCharge}">
+                    <input type="hidden" name="reason" value="Deviation investigated and resolved">
+                    <button type="submit" class="btn btn-success btn-sm">
+                        ▶️ Resume Production
+                    </button>
+                </form>
+
+                <!-- Add EBR Step -->
+                <a th:href="@{'/ebr/new?batchId=' + ${batch.id}}" class="btn btn-secondary btn-sm">
+                    ✍️ Log EBR Step
+                </a>
+
+                <!-- Quality Review -->
+                <a th:href="@{'/quality/' + ${batch.id} + '/review'}" class="btn btn-secondary btn-sm">
+                    🔬 QC Disposition
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Manufacturing Stage Pipeline Stepper -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Good Manufacturing Practice (GMP) Unit Operations Lifecycle</div>
+            <span style="font-size: 0.8rem; font-weight: 600; color: #0284c7;" th:text="${batch.currentStage.progressPercentage + '% Process Complete'}">50%</span>
+        </div>
+        <div class="card-body">
+            <div class="stage-stepper">
+                <div th:each="st : ${stages}"
+                     class="step-item"
+                     th:classappend="${st.sequence < batch.currentStage.sequence ? 'completed' : (st.sequence == batch.currentStage.sequence ? 'active' : '')}">
+                    <div class="step-circle" th:text="${st.sequence < batch.currentStage.sequence ? '✓' : st.sequence}">1</div>
+                    <div class="step-label" th:text="${st.displayName}">Stage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Metadata Details -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Batch Dossier &amp; Master Formula Specifications</div>
+            <span style="font-size: 0.8rem; color: #64748b;" th:text="'Registered on: ' + ${#temporals.format(batch.createdAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Dosage Form</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;" th:text="${batch.dosageForm}">Tablet</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Target Quantity</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;">
+                        <span th:text="${#numbers.formatDecimal(batch.targetQuantity, 0, 'COMMA', 0, 'POINT')}">500,000</span>
+                        <span style="font-size: 0.8rem; color: #64748b;" th:text="${batch.unit}">Tablets</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Manufacturing Line</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;" th:text="${batch.assignedLine}">Line 1</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Formulation Lead</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;" th:text="${batch.operatorInCharge}">Dr. A. Verma</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Manufacturing Date</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;" th:text="${batch.manufacturingDate}">2026-01-01</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Expiration Date</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: #0f172a;" th:text="${batch.expiryDate}">2029-01-01</div>
+                </div>
+            </div>
+
+            <div th:if="${batch.notes != null and !batch.notes.empty}" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Formulation Remarks &amp; Precautions</div>
+                <div style="font-size: 0.9rem; color: #334155; margin-top: 0.25rem;" th:text="${batch.notes}">Notes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Electronic Batch Records (EBR) Steps Table -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Electronic Batch Records (EBR) Executed Steps</div>
+                <div style="font-size: 0.8rem; color: #64748b;">Step-by-step master manufacturing instructions and critical process parameters</div>
+            </div>
+            <a th:href="@{'/ebr/new?batchId=' + ${batch.id}}" class="btn btn-primary btn-sm">➕ Add EBR Step</a>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Step #</th>
+                        <th>Stage</th>
+                        <th>Step Name / Unit Operation</th>
+                        <th>Target Parameters (CPP)</th>
+                        <th>Actual Measured Parameters</th>
+                        <th>Status</th>
+                        <th>Operator</th>
+                        <th>Supervisor</th>
+                        <th>Signed Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(ebrRecords)}">
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No EBR steps executed for this batch yet. Click "Add EBR Step" to begin digital logging.
+                        </td>
+                    </tr>
+                    <tr th:each="ebr : ${ebrRecords}">
+                        <td style="font-weight: 700; color: #0284c7;" th:text="'#' + ${ebr.stepNumber}">#1</td>
+                        <td>
+                            <span class="badge badge-secondary" th:text="${ebr.stage.displayName}">Stage</span>
+                        </td>
+                        <td>
+                            <strong th:text="${ebr.stepName}">Step Name</strong>
+                            <div th:if="${ebr.comments != null and !ebr.comments.empty}" style="font-size: 0.75rem; color: #64748b;" th:text="${ebr.comments}">Comments</div>
+                        </td>
+                        <td style="font-family: monospace; font-size: 0.8rem;" th:text="${ebr.targetParameters}">Target</td>
+                        <td style="font-family: monospace; font-size: 0.8rem; font-weight: 600;" th:text="${ebr.actualParameters}">Actual</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${ebr.status == 'PASS' ? 'badge-success' : (ebr.status == 'DEVIATION' ? 'badge-warning' : 'badge-danger')}"
+                                  th:text="${ebr.status}">PASS</span>
+                            <div th:if="${ebr.deviationDetails != null and !ebr.deviationDetails.empty}"
+                                 style="font-size: 0.7rem; color: #b91c1c; margin-top: 0.2rem;" th:text="${ebr.deviationDetails}">Dev details</div>
+                        </td>
+                        <td th:text="${ebr.operatorName}">Operator</td>
+                        <td th:text="${ebr.supervisorName != null ? ebr.supervisorName : '—'}">Supervisor</td>
+                        <td style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(ebr.signedAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quality Control (QC) Records Section -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Quality Control (QC) Analytical Testing &amp; Release Dispositions</div>
+                <div style="font-size: 0.8rem; color: #64748b;">Laboratory assay, dissolution, and formal QA disposition</div>
+            </div>
+            <a th:href="@{'/quality/' + ${batch.id} + '/review'}" class="btn btn-secondary btn-sm">🔬 New QC Review</a>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Review Date</th>
+                        <th>Assay (95-105%)</th>
+                        <th>Dissolution (&gt;=80%)</th>
+                        <th>Moisture (&lt;=3%)</th>
+                        <th>Microbial Status</th>
+                        <th>QA Disposition</th>
+                        <th>QC Inspector</th>
+                        <th>QA Sign-Off</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(qualityRecords)}">
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
+                            No QC reviews logged yet. Batch requires analytical laboratory testing before release.
+                        </td>
+                    </tr>
+                    <tr th:each="qc : ${qualityRecords}">
+                        <td th:text="${#temporals.format(qc.reviewedAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td>
+                            <strong th:text="${qc.assayPercentage + '%'}">99.8%</strong>
+                        </td>
+                        <td>
+                            <strong th:text="${qc.dissolutionRate + '%'}">95.0%</strong>
+                        </td>
+                        <td>
+                            <span th:text="${qc.moistureContent + '%'}">1.5%</span>
+                        </td>
+                        <td th:text="${qc.microbialStatus}">Conforms</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${qc.disposition == 'APPROVED' ? 'badge-success' : (qc.disposition == 'UNDER_REVIEW' ? 'badge-primary' : (qc.disposition == 'QUARANTINED' ? 'badge-warning' : 'badge-danger'))}"
+                                  th:text="${qc.disposition}">APPROVED</span>
+                        </td>
+                        <td th:text="${qc.inspectorName}">Inspector</td>
+                        <td th:text="${qc.qaOfficer != null ? qc.qaOfficer : '—'}">QA Officer</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Batch Audit Trail Section -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Batch Audit Trail (21 CFR Part 11 Immutable Records)</div>
+            <span style="font-size: 0.8rem; color: #64748b;">Tamper-evident chronological history</span>
+        </div>
+        <div class="table-responsive">
+            <table class="mes-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Action</th>
+                        <th>Performed By</th>
+                        <th>Role</th>
+                        <th>Reason for Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(auditLogs)}">
+                        <td colspan="6" style="text-align: center; padding: 1.5rem; color: #64748b;">
+                            No audit events found for this batch.
+                        </td>
+                    </tr>
+                    <tr th:each="log : ${auditLogs}">
+                        <td style="font-family: monospace; font-size: 0.8rem; color: #64748b;" th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">Time</td>
+                        <td>
+                            <span class="badge badge-secondary" th:text="${log.action}">Action</span>
+                        </td>
+                        <td><strong th:text="${log.performedBy}">Operator</strong></td>
+                        <td th:text="${log.userRole}">Role</td>
+                        <td th:text="${log.reasonForChange}">Reason</td>
+                        <td th:text="${log.details}">Details</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

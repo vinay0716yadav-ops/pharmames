@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('QC Review - ' + ${batch.batchNumber})}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('quality')}"></header>
+
+<div class="container" style="max-width: 850px;">
+    <div style="margin-bottom: 1.5rem;">
+        <a th:href="@{'/batches/' + ${batch.id}}" style="text-decoration: none; color: #64748b; font-size: 0.85rem;">&larr; Back to Batch Dossier</a>
+        <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">Quality Control Review &amp; QA Disposition</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Analytical assay verification and regulatory release authorization for Batch <strong th:text="${batch.batchNumber}">BAT-001</strong></p>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Batch Summary Banner -->
+    <div class="card" style="margin-bottom: 1.25rem; background: #f8fafc;">
+        <div class="card-body" style="padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <strong style="color: #0f172a;" th:text="${batch.productName}">Product Name</strong>
+                <div style="font-size: 0.8rem; color: #64748b;" th:text="'Form: ' + ${batch.dosageForm} + ' | Line: ' + ${batch.assignedLine}">Specs</div>
+            </div>
+            <div>
+                <span class="badge" th:classappend="${batch.status.badgeClass}" th:text="${batch.status.displayName}">Status</span>
+                <span class="badge badge-info" th:text="${batch.currentStage.displayName}">Stage</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- QC Testing Form -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Laboratory Analytical Results &amp; Final Disposition</div>
+            <span class="badge badge-primary">21 CFR Part 11 Electronic Signature</span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{'/quality/' + ${batch.id} + '/review'}" th:object="${record}" method="post">
+                <div class="form-grid">
+                    <!-- Assay % -->
+                    <div class="form-group">
+                        <label class="form-label" for="assayPercentage">Active Ingredient Assay (%) * (Spec: 95.0% – 105.0%)</label>
+                        <input type="number" step="0.01" id="assayPercentage" th:field="*{assayPercentage}" class="form-control" placeholder="e.g. 99.8" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('assayPercentage')}" th:errors="*{assayPercentage}"></span>
+                    </div>
+
+                    <!-- Dissolution Rate % -->
+                    <div class="form-group">
+                        <label class="form-label" for="dissolutionRate">Dissolution Rate (%) * (Spec: &gt;= 80.0% in 45 min)</label>
+                        <input type="number" step="0.01" id="dissolutionRate" th:field="*{dissolutionRate}" class="form-control" placeholder="e.g. 94.5" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('dissolutionRate')}" th:errors="*{dissolutionRate}"></span>
+                    </div>
+
+                    <!-- Moisture Content % -->
+                    <div class="form-group">
+                        <label class="form-label" for="moistureContent">Moisture / Loss on Drying (%) * (Spec: &lt;= 3.0%)</label>
+                        <input type="number" step="0.01" id="moistureContent" th:field="*{moistureContent}" class="form-control" placeholder="e.g. 1.8" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('moistureContent')}" th:errors="*{moistureContent}"></span>
+                    </div>
+
+                    <!-- Microbial Status -->
+                    <div class="form-group">
+                        <label class="form-label" for="microbialStatus">Microbiological Compliance *</label>
+                        <select id="microbialStatus" th:field="*{microbialStatus}" class="form-select" required>
+                            <option value="Conforms to USP/EP Specifications (Sterile/Non-growth)">Conforms to USP/EP Specifications (Sterile/Non-growth)</option>
+                            <option value="Under Incubation Testing (Preliminary Pass)">Under Incubation Testing (Preliminary Pass)</option>
+                            <option value="Non-conforming Bioburden Excursion">Non-conforming Bioburden Excursion</option>
+                        </select>
+                    </div>
+
+                    <!-- QA Disposition Selection -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="disposition">Quality Assurance Release Disposition *</label>
+                        <select id="disposition" th:field="*{disposition}" class="form-select" style="font-weight: 600;" required>
+                            <option value="APPROVED">✅ APPROVED – Authorize commercial market release (Status -> COMPLETED)</option>
+                            <option value="UNDER_REVIEW">⏳ UNDER_REVIEW – Awaiting final confirmatory analytical testing</option>
+                            <option value="QUARANTINED">⚠️ QUARANTINED – Place batch on hold pending deviation/OOS investigation</option>
+                            <option value="REJECTED">❌ REJECTED – Batch failed quality specifications; reject for destruction</option>
+                        </select>
+                    </div>
+
+                    <!-- QC Inspector -->
+                    <div class="form-group">
+                        <label class="form-label" for="inspectorName">QC Analytical Chemist *</label>
+                        <input type="text" id="inspectorName" th:field="*{inspectorName}" class="form-control" placeholder="e.g. R. Henderson (QC Lab)" required>
+                        <span class="form-error" th:if="${#fields.hasErrors('inspectorName')}" th:errors="*{inspectorName}"></span>
+                    </div>
+
+                    <!-- QA Officer Sign-off -->
+                    <div class="form-group">
+                        <label class="form-label" for="qaOfficer">QA Release Officer Electronic Signature *</label>
+                        <input type="text" id="qaOfficer" th:field="*{qaOfficer}" class="form-control" placeholder="e.g. E. Watson (QA Officer)" required>
+                    </div>
+
+                    <!-- Review Notes -->
+                    <div class="form-group full-width">
+                        <label class="form-label" for="reviewNotes">Analytical Justification &amp; Disposition Remarks</label>
+                        <textarea id="reviewNotes" th:field="*{reviewNotes}" rows="3" class="form-control" placeholder="Certificate of Analysis (CoA) reference, stability assessment, deviation justification..."></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+                    <a th:href="@{'/batches/' + ${batch.id}}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        🔬 Commit Quality Review &amp; Update Batch Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>
